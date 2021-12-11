@@ -41,10 +41,6 @@ public class RunParkTycoon implements Runnable {
                 " and be placed adjacent to a tile already on the board. \n" +
                 "Grass: Grass tiles must be placed adjacent to other tiles but have no other rules");
 
-
-        dialog.add(l);
-        frame.add(dialog);
-
         // Status panel
         final JPanel status_panel = new JPanel();
         frame.add(status_panel, BorderLayout.SOUTH);
