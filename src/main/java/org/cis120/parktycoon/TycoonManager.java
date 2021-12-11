@@ -1,6 +1,7 @@
 package org.cis120.parktycoon;
 
 import java.awt.*;
+import java.nio.file.Path;
 import java.util.*;
 
 public class TycoonManager {
@@ -9,14 +10,15 @@ public class TycoonManager {
 
     private static HashMap<Tile.TileType, Double> typePercentage;
 
-    public final double PATH_PERCENTAGE = 0;
-    public final double GRASS_PERCENTAGE = .7;
+    public final double PATH_PERCENTAGE = .45;
+    public final double GRASS_PERCENTAGE = .2;
     public final double FOREST_PERCENTAGE = .3;
-    public final double SHOP_PERCENTAGE = 0;
+    public final double SHOP_PERCENTAGE = .05;
 
     private ArrayList<Tile> validTiles;
     private boolean validTilesNeedsUpdate;
-    private ArrayList<LinkedList<Tile>> paths;
+    private ArrayList<Node<PathTile>> paths;
+    private ArrayList<Guest> guests;
     private ArrayList<HashSet<Tile>> forests;
 
     private TileHolder th;
@@ -52,6 +54,8 @@ public class TycoonManager {
         placeTile(getTile(col, col), new GrassTile(), true);
 
         forests = new ArrayList<HashSet<Tile>>();
+        paths = new ArrayList<Node<PathTile>>();
+        guests = new ArrayList<Guest>();
         validTiles = checkValidTiles();
     }
 
@@ -103,7 +107,6 @@ public class TycoonManager {
             th.setTileToPlay(0);
         }
         checkValidTiles();
-        System.out.println("th Tile To Play " + th.getTileToPlay());
     }
 
 
@@ -111,16 +114,19 @@ public class TycoonManager {
         Point p = coordToTile(pX, pY);
         //Avoids issues with mouse pointer being on game board border
         //Clamps tile values between 0 and sqrt(TILE_NUM)-1
-        int safeX = (int) Math.min(Math.max(0,p.x), Math.sqrt(GameBoard.INITIAL_TILE_NUM)-1);
-        int safeY = (int) Math.min(Math.max(0,p.y), Math.sqrt(GameBoard.INITIAL_TILE_NUM)-1);
+        int safeX = (int) Math.min(Math.max(0,p.x), Math.sqrt(GameBoard.getTileNum())-1);
+        int safeY = (int) Math.min(Math.max(0,p.y), Math.sqrt(GameBoard.getTileNum())-1);
         Tile targetTile = getTiles()[safeX][safeY];
         return (targetTile.getType() == Tile.TileType.BLANK);
     }
 
     public static Point coordToTile(int pX, int pY){
-        int xVal = (int) Math.floor(pX/(double)Tile.SIZE);
-        int yVal = (int) Math.floor(pY/(double)Tile.SIZE);
-        return new Point(xVal, yVal);
+        double columns = Math.sqrt(GameBoard.getTileNum());
+        int safeX = (int) Math.min(Math.max(0,pX), Tile.SIZE * columns);
+        int safeY = (int) Math.min(Math.max(0,pY), Tile.SIZE * columns);
+        safeX = (int) Math.min(Math.floor(safeX/Tile.SIZE), columns-1);
+        safeY = (int) Math.min(Math.floor(safeY/Tile.SIZE), columns-1);
+        return new Point(safeX, safeY);
     }
 
     public static Point tileToCoord(int row, int col){
@@ -128,7 +134,6 @@ public class TycoonManager {
         int yVal = col*Tile.SIZE;
         return new Point(xVal, yVal);
     }
-
 
     public boolean checkTileValidity(int col, int row, boolean check) {
         Tile targetTile = getTiles()[col][row];
@@ -197,6 +202,38 @@ public class TycoonManager {
         placeTile(targetTile, t, first);
     }
 
+    public void updatePaths(PathTile p){
+        Tile [] neighbors = (getNeighbors(p.getCol_val(), p.getRow_val()));
+        if(PathTile.touchingEdge(neighbors, p) && paths.size() == 0) {
+            Node<PathTile> newTree = calculatePaths(new Node<PathTile>(p), p);
+            paths.add(newTree);
+            if(newTree.size() > 1){
+                guests.add(new Guest(newTree));
+            }
+        }
+
+        else if(paths.size() != 0){
+            Node<PathTile> newTree = calculatePaths(new Node<PathTile>(p), p);
+            boolean add = true;
+            for(Node<PathTile> n : paths) {
+                if (n.overlap(newTree)) {
+                    if (n.getTileSet().size() <
+                            newTree.getTileSet().size()) {
+                        add = false;
+                        paths.set(paths.indexOf(n), newTree);
+                    }
+                }
+            }
+            if(add) {
+                paths.add(newTree);
+                if(newTree.size() > 1){
+                    guests.add(new Guest(newTree));
+                }
+            }
+        }
+    }
+
+
     public void placeTile(Tile targetTile, Tile tileToPlace, boolean first){
         if(!first){
             th.removeTile();
@@ -209,10 +246,34 @@ public class TycoonManager {
         tileToPlace.setRow_val(targetTile.getRow_val());
         tileToPlace.setCol_val(targetTile.getCol_val());
         tiles[targetTile.getCol_val()][targetTile.getRow_val()] = tileToPlace;
+        if(tileToPlace.getType() == Tile.TileType.PATH){
+            updatePaths((PathTile) tileToPlace);
+            for(Node<PathTile> n : paths){
+                System.out.println("Set of Paths: " +  n.toString());
+            }
+        }
         if(!first){
             checkValidTiles();
         }
 
+    }
+
+    public Node<PathTile> calculatePaths(Node<PathTile> tree, PathTile p){
+        Tile[] neighbors =  getNeighbors(p.getCol_val(), p.getRow_val());
+        for(PathTile.ConnectionPoints cp : PathTile.ConnectionPoints.values()){
+            int neighborDirection = Arrays.asList(PathTile.ConnectionPoints.values()).indexOf(cp);
+            if(neighbors[neighborDirection] != null &&
+                    neighbors[neighborDirection].getType() == Tile.TileType.PATH){
+                PathTile neighborToCheck = (PathTile) neighbors[neighborDirection];
+                    if(PathTile.pathConnected(neighborDirection, neighborToCheck, p)
+                        && !tree.contains(neighborToCheck)){
+                        Node<PathTile> branch = new Node<PathTile>(neighborToCheck);
+                        tree.addNode(cp, branch);
+                        tree.addNode(cp, calculatePaths(branch, neighborToCheck));
+                    }
+            }
+        }
+        return tree;
     }
 
     public ArrayList<Tile> checkValidTiles(){
@@ -227,7 +288,6 @@ public class TycoonManager {
         }
         validTilesNeedsUpdate = !validTiles.equals(list);
         if(validTilesNeedsUpdate){
-            System.out.println("Valid Tiles needs updating");
             validTiles = list;
         }
         return list;
@@ -256,6 +316,10 @@ public class TycoonManager {
         return neighbors;
     }
 
+    public ArrayList<Node<PathTile>> getPaths(){
+        return this.paths;
+    }
+
     public Tile[][] getTiles(){
         return tiles.clone();
     }
@@ -280,6 +344,9 @@ public class TycoonManager {
         return th.getPreferredSize();
     }
 
+    public ArrayList<Guest> getGuests(){
+        return this.guests;
+    }
 
     /**
      * check if either the player has won by exhausting their deck

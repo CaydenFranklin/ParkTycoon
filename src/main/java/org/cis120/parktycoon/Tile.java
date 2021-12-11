@@ -14,8 +14,8 @@ public class Tile extends GameObj{
     public static int SIZE = 100;
     public static final int INIT_POS_X = 130;
     public static final int INIT_POS_Y = 130;
-    private int row_val;
     private int col_val;
+    private int row_val;
 
     //L Tiles occur 2 times less likely than straight pieces
     public static final int L_TILE_FREQ = 5;
@@ -160,7 +160,7 @@ public class Tile extends GameObj{
     }
 
     public String toString(){
-        return this.type.toString();
+        return this.type.toString() + " at (" + this.getCol_val() + "," + this.getRow_val()  +")";
     }
 
     public boolean isValid(Tile[] neighbors, ArrayList<HashSet<Tile>> forests, Tile targetTile, Tile tileToPlace){
@@ -203,6 +203,10 @@ public class Tile extends GameObj{
             return true;
         }
         return false;
+    }
+
+    public Point getCenter(){
+        return new Point(this.getPx()+Tile.SIZE, this.getPy()+Tile.SIZE);
     }
 
 

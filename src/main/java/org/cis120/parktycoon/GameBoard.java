@@ -8,10 +8,7 @@ package org.cis120.parktycoon;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 
 /**
@@ -36,14 +33,14 @@ public class GameBoard extends JPanel {
     private TycoonManager tm; // model for the game
     private JLabel status; // current status text
 
-    public static final int INITIAL_TILE_NUM = 9;
+    public static final int INITIAL_TILE_NUM = 64;
 
     private boolean showPreviewTile = false;
 
     private Tile previewTile;
 
 
-    private int tileNum;
+    private static int tileNum;
 
 
     public static final int BORDER_WIDTH = 100;
@@ -59,6 +56,8 @@ public class GameBoard extends JPanel {
     public GameBoard(JLabel statusInit, TileHolder tileHolder) {
         // creates border around the court area, JComponent method
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+
 
         // Enable keyboard focus on the court area. When this component has the
         // keyboard focus, key events are handled by its key listener.
@@ -111,29 +110,32 @@ public class GameBoard extends JPanel {
             }
         });
 
+
+
         this.setBackground(Color.white);
 
     }
 
-    public int getTileNum() {
+    public static int getTileNum() {
         return tileNum;
     }
 
-    public void setTileNum(int tileNum) {
-        this.tileNum = tileNum;
+    public static void setTileNum(int tileNum) {
+        tileNum = tileNum;
     }
 
     public void updatePreviewTile(Point p){
         previewTile = tm.getCurrentTileToPlay();
         if(showPreviewTile){
             Point newP = TycoonManager.coordToTile(p.x, p.y);
-            Point xyVals = TycoonManager.tileToCoord(newP.x, newP.y);
-            if(previewTile.getPx() != xyVals.x || previewTile.getPy() != xyVals.y){
-                previewTile.setPx(xyVals.x);
-                previewTile.setPy(xyVals.y);
+            Point tileVals = TycoonManager.tileToCoord(newP.x, newP.y);
+            if(previewTile.getPx() != tileVals.x || previewTile.getPy() != tileVals.y){
+                previewTile.setPx(tileVals.x);
+                previewTile.setPy(tileVals.y);
             }
         }
     }
+
 
     /**
      * (Re-)sets the game to its initial state.
@@ -167,7 +169,6 @@ public class GameBoard extends JPanel {
      */
     private void updateStatus() {
         int winner = tm.checkGameOver();
-        System.out.println(winner);
         if (winner == 1) {
             makeBoardLarger();
         }
@@ -194,6 +195,7 @@ public class GameBoard extends JPanel {
         if(showPreviewTile){
             previewTile.draw(g, Tile.SIZE);
         }
+
     }
 
     public void drawBoundingBox(int i, int j, Graphics g, int width){

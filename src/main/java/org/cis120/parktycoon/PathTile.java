@@ -89,6 +89,8 @@ public class PathTile extends Tile {
                 Arrays.asList(neighborConnectionSet).contains(opposite);
     }
 
+
+
     public static boolean pathConflict(int neighborDirection, PathTile neighbor, PathTile tileToPlace){
         ConnectionPoints [] neighborConnectionSet = neighbor.getConnections();
         ConnectionPoints [] placeConnectionSet = tileToPlace.getConnections();
@@ -101,6 +103,16 @@ public class PathTile extends Tile {
         else {
             return (!Arrays.asList(placeConnectionSet).contains(touching));
         }
+    }
+
+    public static boolean touchingEdge(Tile[] neighbors, PathTile tile){
+        ConnectionPoints [] placeConnectionSet = tile.getConnections();
+        for(int i = 0; i < neighbors.length; i++){
+            ConnectionPoints touching = ConnectionPoints.values()[i];
+            if(Arrays.asList(placeConnectionSet).contains(touching) && neighbors[i] == null)
+                return true;
+        }
+        return false;
     }
 
 
