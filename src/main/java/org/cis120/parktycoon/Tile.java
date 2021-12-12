@@ -206,7 +206,7 @@ public class Tile extends GameObj{
     }
 
     public Point getCenter(){
-        return new Point(this.getPx()+Tile.SIZE, this.getPy()+Tile.SIZE);
+        return new Point(this.getPx()+(Tile.SIZE/2), this.getPy()+(Tile.SIZE/2));
     }
 
 

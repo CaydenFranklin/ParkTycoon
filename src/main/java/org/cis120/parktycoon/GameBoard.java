@@ -49,6 +49,7 @@ public class GameBoard extends JPanel {
     private static int BOARD_HEIGHT = (int) Math.sqrt(INITIAL_TILE_NUM)*Tile.SIZE;
     public static final int MAX_BOARD_WIDTH = 1000;
     public static final int MAX_BOARD_HEIGHT = 1000;
+    public static final int INTERVAL = 35;
 
     /**
      * Initializes the game board.
@@ -109,6 +110,13 @@ public class GameBoard extends JPanel {
                 repaint();
             }
         });
+
+        Timer timer = new Timer(INTERVAL, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                tick();
+            }
+        });
+        timer.start();
 
 
 
@@ -196,6 +204,10 @@ public class GameBoard extends JPanel {
             previewTile.draw(g, Tile.SIZE);
         }
 
+        for(Guest guest : tm.getGuests()){
+            guest.draw(g);
+        }
+
     }
 
     public void drawBoundingBox(int i, int j, Graphics g, int width){
@@ -219,6 +231,12 @@ public class GameBoard extends JPanel {
         }
 
     }
+
+    public void tick(){
+        repaint();
+        tm.tick();
+    }
+
 
 
 

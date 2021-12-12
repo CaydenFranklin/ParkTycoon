@@ -21,7 +21,7 @@ public class Guest extends GameObj {
     private Random r;
     private PathTile.ConnectionPoints directionFrom;
 
-    public static final int SIZE = 100;
+    public static final int SIZE = 50;
 
     public Guest(Node<PathTile> pathTree){
         super(pathTree.getPath().getCenter().x, pathTree.getPath().getCenter().y, SIZE, SIZE);
@@ -72,16 +72,20 @@ public class Guest extends GameObj {
 
     }
 
+    public void adjustVisualPosition(int directionX, int directionY){
+        this.setPx(this.getPx() + -1 * directionX * VELOCITY);
+        this.setPy(this.getPy() + -1 * directionY * VELOCITY);
+        System.out.println("Guest at " + this.getPx()  + " " + this.getPy());
+    }
+
     public void updatePosition() {
         if(nextPoints.size() != 0 ) {
             if (this.getPx() != nextPoints.get(0).x || this.getPy() != nextPoints.get(0).y) {
                 float deltaX = this.getPx() - (nextPoints.get(0).x);
                 int directionX = (int) Math.signum(deltaX);
-                this.setPx(this.getPx() + -1 * directionX * VELOCITY);
                 float deltaY = this.getPy() - (nextPoints.get(0).y);
                 int directionY = (int) Math.signum(deltaY);
-                this.setPy(this.getPy() + -1 * directionY * VELOCITY);
-                System.out.println("Guest moved to " + this.getPx() + "," + this.getPy());
+                adjustVisualPosition(directionX, directionY);
             }
             else{
                 nextPoints.remove(0);
@@ -98,7 +102,8 @@ public class Guest extends GameObj {
 
 
     public void draw(Graphics g) {
-        g.drawImage(img, this.getPx(), this.getPy(), SIZE, SIZE, null);
+        g.drawImage(img, this.getPx() - SIZE/2, this.getPy()- SIZE/2, SIZE, SIZE,
+                null);
     }
 
 

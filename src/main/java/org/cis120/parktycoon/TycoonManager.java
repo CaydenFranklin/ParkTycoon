@@ -10,10 +10,10 @@ public class TycoonManager {
 
     private static HashMap<Tile.TileType, Double> typePercentage;
 
-    public final double PATH_PERCENTAGE = .45;
-    public final double GRASS_PERCENTAGE = .2;
-    public final double FOREST_PERCENTAGE = .3;
-    public final double SHOP_PERCENTAGE = .05;
+    public final double PATH_PERCENTAGE = .7;
+    public final double GRASS_PERCENTAGE = .1;
+    public final double FOREST_PERCENTAGE = .1;
+    public final double SHOP_PERCENTAGE = .1;
 
     private ArrayList<Tile> validTiles;
     private boolean validTilesNeedsUpdate;
@@ -346,6 +346,12 @@ public class TycoonManager {
 
     public ArrayList<Guest> getGuests(){
         return this.guests;
+    }
+
+    public void tick(){
+        for(Guest g: guests) {
+            g.updatePosition();
+        }
     }
 
     /**

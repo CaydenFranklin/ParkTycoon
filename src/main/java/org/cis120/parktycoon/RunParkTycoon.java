@@ -29,18 +29,6 @@ public class RunParkTycoon implements Runnable {
         frame.setLocation(300, 300);
 
 
-        final JDialog dialog = new JDialog(frame);
-
-        //Create instructions
-        JLabel l = new JLabel("Welcome to Park Tycoon! \n In this game you will place tiles on the board until " +
-                "you have exhausted your deck of 64 tiles. If you win, you will get the chance to expand your board." +
-                "You lose when you can no longer place tiles. Each Tile has specific rules: \n" +
-                "Forest: Forests can be placed anywhere, but must border 2 other adjacent Forest Tiles. \n" +
-                "If a forest is placed by itself, your next two must be placed adjacent to it. \n" +
-                "Path: Path Tiles (and their sub-category Shop tiles), must connect to other paths \n" +
-                " and be placed adjacent to a tile already on the board. \n" +
-                "Grass: Grass tiles must be placed adjacent to other tiles but have no other rules");
-
         // Status panel
         final JPanel status_panel = new JPanel();
         frame.add(status_panel, BorderLayout.SOUTH);
